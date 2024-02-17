@@ -1,26 +1,27 @@
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "token.h"
 #include "lexer.h"
 
-const token_separator SEPARATORS[] = {
-	{.type = TOKEN_OPEN_PAREN, .value = '('},
-	{.type = TOKEN_CLOSE_PAREN, .value = ')'},
-	{.type = TOKEN_OPEN_BRACE, .value = '{'},
-	{.type = TOKEN_CLOSE_BRACE, .value = '}'},
-	{.type = TOKEN_OPEN_BRACKET, .value = '['},
-	{.type = TOKEN_CLOSE_BRACKET, .value = ']'},
-	{.type = TOKEN_COMMA, .value = ','},
-	{.type = TOKEN_SEMICOLON, .value = ';'},
+const token SEPARATORS[] = {
+	{.type = TOKEN_OPEN_PAREN, .value = "("},
+	{.type = TOKEN_CLOSE_PAREN, .value = ")"},
+	{.type = TOKEN_OPEN_BRACE, .value = "{"},
+	{.type = TOKEN_CLOSE_BRACE, .value = "}"},
+	{.type = TOKEN_OPEN_BRACKET, .value = "["},
+	{.type = TOKEN_CLOSE_BRACKET, .value = "]"},
+	{.type = TOKEN_COMMA, .value = ","},
+	{.type = TOKEN_SEMICOLON, .value = ";"},
 };
-const size_t SEPARATOR_COUNT = sizeof(SEPARATORS) / sizeof(token_separator);
+const size_t SEPARATOR_COUNT = sizeof(SEPARATORS) / sizeof(token);
 
-const token_identifier KEYWORDS[] = {
+const token KEYWORDS[] = {
 	{.type = TOKEN_KEYWORD_INT, .value = "int"},
 	{.type = TOKEN_KEYWORD_CHAR, .value = "char"},
 	{.type = TOKEN_KEYWORD_RETURN, .value = "return"},
 };
-const size_t KEYWORD_COUNT = sizeof(KEYWORDS) / sizeof(token_identifier);
+const size_t KEYWORD_COUNT = sizeof(KEYWORDS) / sizeof(token);
 
 int line = 1;
 
@@ -35,46 +36,51 @@ void lexer_consume(FILE *fp) {
 	ungetc(c, fp);
 }
 
-token_t lexer_next(FILE *fp) {
+token lexer_next(FILE *fp) {
 	lexer_consume(fp);
 
-	if (lexer_end(fp) == TOKEN_END)
-		return TOKEN_END;
+	if (lexer_end(fp).type == TOKEN_END) { 
+		return (token) {.type = TOKEN_END};
+	}
 
-	token_t t;
-	if ((t = lexer_spacer(fp)) && t != TOKEN_UNKNOWN)
+	token t = lexer_spacer(fp);
+	if (t.type != TOKEN_UNKNOWN)
 		return t;
-	if ((t = lexer_keyword(fp)) && t != TOKEN_UNKNOWN)
+	t = lexer_keyword(fp);
+	if (t.type != TOKEN_UNKNOWN)
 		return t;
-	if ((t = lexer_start_identifier(fp)) && t != TOKEN_UNKNOWN)
+	t = lexer_start_identifier(fp);
+	if (t.type != TOKEN_UNKNOWN)
 		return t;
-	if ((t = lexer_number(fp)) && t != TOKEN_UNKNOWN)
+	t = lexer_number(fp);
+	if (t.type != TOKEN_UNKNOWN)
 		return t;
 	
-	return TOKEN_UNKNOWN;
+	fgetc(fp); // consume unknown
+	return t;
 }
 
-token_t lexer_end(FILE *fp) {
+token lexer_end(FILE *fp) {
 	int c = fgetc(fp);
 	if (c == EOF) {
-		return TOKEN_END;
+		return (token) {.type = TOKEN_END};
 	}
 	ungetc(c, fp);
-	return TOKEN_UNKNOWN;
+	return (token) {.type = TOKEN_UNKNOWN};
 }
 
-token_t lexer_spacer(FILE *fp) {
+token lexer_spacer(FILE *fp) {
 	int c = fgetc(fp);
 	for (int i = 0; i < SEPARATOR_COUNT; i++) {
-		if (c == SEPARATORS[i].value) {
-			return SEPARATORS[i].type;
+		if (c == *SEPARATORS[i].value) {
+			return (token) { .type = SEPARATORS[i].type };
 		}
 	}
 	ungetc(c, fp);
-	return TOKEN_UNKNOWN;
+	return (token) {.type = TOKEN_UNKNOWN};
 }
 
-token_t lexer_keyword(FILE *fp) {
+token lexer_keyword(FILE *fp) {
 	off_t start = ftello(fp);
 
 	int c = fgetc(fp);
@@ -89,7 +95,7 @@ token_t lexer_keyword(FILE *fp) {
 					return lexer_identifier(fp, start, pos-start);
 				}
 				ungetc(c, fp);
-				return TOKEN_KEYWORD_INT;
+				return (token) { .type = TOKEN_KEYWORD_INT };
 			} else {
 				off_t pos = ftello(fp);
 				return lexer_identifier(fp, start, pos-start);
@@ -103,8 +109,8 @@ token_t lexer_keyword(FILE *fp) {
 		return lexer_identifier(fp, start, pos-start);
 	}
 	
-	fputc(c, fp);
-	return TOKEN_UNKNOWN;
+	ungetc(c, fp);
+	return (token) {.type = TOKEN_UNKNOWN};
 }
 
 int valid_ident_start(int c) {
@@ -115,7 +121,7 @@ int valid_ident_body(int c) {
 	return isalpha(c) || isdigit(c) || c == '_';
 }
 
-token_t lexer_start_identifier(FILE *fp) {
+token lexer_start_identifier(FILE *fp) {
 	int c = fgetc(fp);
 	if (valid_ident_start(c)) {
 		off_t start = ftello(fp) - 1;
@@ -123,47 +129,69 @@ token_t lexer_start_identifier(FILE *fp) {
 	}
 
 	ungetc(c, fp);
-	return TOKEN_UNKNOWN;
+	return (token) {.type = TOKEN_UNKNOWN};
 }
 
-token_t lexer_number(FILE *fp) {
+token lexer_number(FILE *fp) {
+	off_t start = ftello(fp);
 	int c = fgetc(fp);
 
 	if (isnumber(c)) {
-		off_t start = ftello(fp);
+		token number = { .type = TOKEN_NUMBER };
 		c = fgetc(fp);
 		while (isnumber(c)) {
 			c = fgetc(fp);
 		}
 		ungetc(c, fp);
-		off_t pos = ftello(fp);
-		size_t length = pos - start;
+		off_t end = ftello(fp);
+		size_t length = end - start;
 
-		return TOKEN_NUMBER;
+		number.value = lexer_analyze(fp, start, length);
+		return number;
 	}
 
 	ungetc(c, fp);
-	return TOKEN_UNKNOWN;
+	return (token) {.type = TOKEN_UNKNOWN};
 }
 
-token_t lexer_identifier(FILE *fp, off_t start, size_t length) {
+token lexer_identifier(FILE *fp, off_t start, size_t length) {
 	int c = fgetc(fp);
+	token ident = { .type = TOKEN_IDENTIFIER };
 	while (valid_ident_body(c)) {
 		length++;
 		c = fgetc(fp);
 	}
-	// TODO: get identifier value
+	ident.value = lexer_analyze(fp, start, length);
 	ungetc(c, fp);
-	return TOKEN_IDENTIFIER;
+	return ident;
 }
 
-// TODO: make all lex_ functions return token structs, NOT raw token_t values
-//			(we want to know what the token contains)
+char* lexer_analyze(FILE *fp, off_t start, size_t length) {
+	off_t restore = ftello(fp);
+
+	fseeko(fp, start, SEEK_SET);
+	char* value = (char*) malloc(sizeof(char) * length + 1);
+	for (int i = 0; i < length; i++) {
+		value[i] = fgetc(fp);
+	}
+	value[length] = '\0';
+
+	fseeko(fp, restore, SEEK_SET);
+	return value;
+}
+
 void lexer(FILE *fp) {
-	token_t t = lexer_next(fp);
-	while (t != TOKEN_END)
+	token t = lexer_next(fp);
+	while (t.type != TOKEN_END)
 	{
-		printf("%d: %s\n", line, tokenName(t));
+		if (t.value != 0) {
+			printf("%d: %s (%s)\n", line, tokenName(&t), t.value);
+		} else {
+			printf("%d: %s\n", line, tokenName(&t));
+		}
+
+		free(t.value);
+
 		t = lexer_next(fp);
 	}
 }

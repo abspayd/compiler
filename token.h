@@ -38,19 +38,8 @@ typedef enum {
 typedef struct {
 	token_t type;
 	char* value;
-} token_identifier;
-
-typedef struct {
-	token_identifier token;
-	int line;
 } token;
 
-typedef struct {
-	token_t type;
-	char value;
-} token_separator;
-
-
-char* tokenName(token_t token);
+char* tokenName(token *token);
 
 #endif // TOKEN_H_

@@ -1,7 +1,7 @@
 #include "token.h"
 
-char* tokenName(token_t token) {
-	switch (token) {
+char* tokenName(token *token) {
+	switch (token->type) {
 		case TOKEN_END: return "TOKEN_END";
 		case TOKEN_UNKNOWN: return "TOKEN_UNKNOWN";
 		case TOKEN_COMMENT: return "TOKEN_COMMENT";
