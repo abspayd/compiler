@@ -18,7 +18,11 @@ const size_t SEPARATOR_COUNT = sizeof(SEPARATORS) / sizeof(token);
 
 const token KEYWORDS[] = {
 	{.type = TOKEN_KEYWORD_INT, .value = "int"},
+	{.type = TOKEN_KEYWORD_IF, .value = "if"},
 	{.type = TOKEN_KEYWORD_CHAR, .value = "char"},
+	{.type = TOKEN_KEYWORD_ELSE, .value = "else"},
+	{.type = TOKEN_KEYWORD_WHILE, .value = "while"},
+	{.type = TOKEN_KEYWORD_VOID, .value = "void"},
 	{.type = TOKEN_KEYWORD_RETURN, .value = "return"},
 };
 const size_t KEYWORD_COUNT = sizeof(KEYWORDS) / sizeof(token);
@@ -55,6 +59,9 @@ token lexer_next(FILE *fp) {
 	t = lexer_number(fp);
 	if (t.type != TOKEN_UNKNOWN)
 		return t;
+	t = lexer_operator(fp);
+	if (t.type != TOKEN_UNKNOWN)
+		return t;
 	
 	fgetc(fp); // consume unknown
 	return t;
@@ -80,6 +87,47 @@ token lexer_spacer(FILE *fp) {
 	return (token) {.type = TOKEN_UNKNOWN};
 }
 
+token lexer_operator(FILE *fp) {
+	int c = fgetc(fp);
+
+	if (c == '=') {
+		c = fgetc(fp);
+		if (c == '=') {
+			return (token) {.type = TOKEN_EQUAL_TO};
+		} else {
+			ungetc(c, fp);
+			return (token) {.type = TOKEN_EQUAL};
+		}
+	} else if (c == '!') {
+		c = fgetc(fp);
+		if (c == '=') {
+			return (token) {.type = TOKEN_NOT_EQUAL};
+		} else {
+			ungetc(c, fp);
+			return (token) {.type = TOKEN_NOT};
+		}
+	} else if (c == '<') {
+		c = fgetc(fp);
+		if (c == '=') {
+			return (token) {.type = TOKEN_LESS_THAN_EQUAL};
+		} else {
+			ungetc(c, fp);
+			return (token) {.type = TOKEN_LESS_THAN};
+		}
+	} else if (c == '>') {
+		c = fgetc(fp);
+		if (c == '=') {
+			return (token) {.type = TOKEN_GREATER_THAN_EQUAL};
+		} else {
+			ungetc(c, fp);
+			return (token) {.type = TOKEN_GREATER_THAN};
+		}
+	}
+
+	ungetc(c, fp);
+	return (token) {.type = TOKEN_UNKNOWN};
+}
+
 token lexer_keyword(FILE *fp) {
 	off_t start = ftello(fp);
 
@@ -100,11 +148,13 @@ token lexer_keyword(FILE *fp) {
 				off_t pos = ftello(fp);
 				return lexer_identifier(fp, start, pos-start);
 			}
+		} else if (c == 'f') {
+			return (token) { .type = TOKEN_KEYWORD_IF };
 		} else {
 			off_t pos = ftello(fp);
 			return lexer_identifier(fp, start, pos-start);
 		}
-	} else if (valid_ident_start(c)) {
+	}else if (valid_ident_start(c)) {
 		off_t pos = ftello(fp);
 		return lexer_identifier(fp, start, pos-start);
 	}

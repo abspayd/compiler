@@ -13,6 +13,7 @@ token lexer_end(FILE *fp);
 token lexer_next_literal(FILE *fp);
 token lexer_spacer(FILE *fp);
 token lexer_keyword(FILE *fp);
+token lexer_operator(FILE *fp);
 token lexer_start_identifier(FILE *fp);
 token lexer_identifier(FILE *fp, off_t start, size_t length);
 token lexer_number(FILE *fp);

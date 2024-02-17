@@ -1,4 +1,14 @@
 int main() {
+	if (foo);
 	int x = 55;
+	int y = 70;
 	int my_array[] = {1, 2, 3, 4};
+
+	x != y;
+	x == y;
+	!my_array;
+	x < y;
+	x <= y;
+	x > y;
+	x >= y;
 }

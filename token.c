@@ -19,6 +19,17 @@ char* tokenName(token *token) {
 		case TOKEN_CLOSE_BRACKET: return "TOKEN_CLOSE_BRACKET";
 		case TOKEN_EQUAL: return "TOKEN_EQUAL";
 		case TOKEN_COMMA: return "TOKEN_COMMA";
+		case TOKEN_EQUAL_TO: return "TOKEN_EQUAL_TO";
+		case TOKEN_NOT: return "TOKEN_NOT";
+		case TOKEN_NOT_EQUAL: return "TOKEN_NOT_EQUAL";
+		case TOKEN_LESS_THAN: return "TOKEN_LESS_THAN";
+		case TOKEN_LESS_THAN_EQUAL: return "TOKEN_LESS_THAN_EQUAL";
+		case TOKEN_GREATER_THAN: return "TOKEN_GREATER_THAN";
+		case TOKEN_GREATER_THAN_EQUAL: return "TOKEN_GREATER_THAN_EQUAL";
+		case TOKEN_KEYWORD_VOID: return "TOKEN_KEYWORD_VOID";
+		case TOKEN_KEYWORD_IF: return "TOKEN_KEYWORD_IF";
+		case TOKEN_KEYWORD_ELSE: return "TOKEN_KEYWORD_ELSE";
+		case TOKEN_KEYWORD_WHILE: return "TOKEN_KEYWORD_WHILE";
 		default: return "Undefinded";
 	}
 }
