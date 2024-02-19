@@ -2,6 +2,17 @@
 #include "lexer.h"
 #include "parser.h"
 
+void printTokenStream(token_stream *ts) {
+	for (int i = 0; i < ts->length; i++) {
+		token t = ts->tokens[i];
+		if (t.value != 0) {
+			printf("%d: %s (%s)\n", t.line, tokenName(&t), t.value);
+		} else {
+			printf("%d: %s\n", t.line, tokenName(&t));
+		}
+	}
+}
+
 int main(int argc, char** argv) {
 
 	if (argc < 2) {
@@ -13,14 +24,9 @@ int main(int argc, char** argv) {
 
 	token_stream ts = lexer(fp);
 
-	for (int i = 0; i < ts.length; i++) {
-		token t = ts.tokens[i];
-		if (t.value != 0) {
-			printf("%d: %s (%s)\n", t.line, tokenName(&t), t.value);
-		} else {
-			printf("%d: %s\n", t.line, tokenName(&t));
-		}
-	}
+	printTokenStream(&ts);
+
+	parser(&ts);
 
 	token_stream_close(&ts);
 

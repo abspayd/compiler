@@ -239,6 +239,7 @@ token_stream lexer(FILE *fp) {
 		t = lexer_next(fp);
 	}
 
+	ts.cursor = 0;
 	return ts;
 }
 

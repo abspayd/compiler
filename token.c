@@ -64,12 +64,11 @@ void token_stream_push(token_stream *ts, token *t) {
 	if (ts->length + 1 > ts->capacity) {
 		token_stream_resize(ts, ts->capacity * 2);
 	}
-	ts->tokens[++ts->cursor] = *t;
+	ts->tokens[ts->cursor++] = *t;
 	ts->length++;
 }
 
-token *token_stream_pop(token_stream *ts) {
-	token *t = &ts->tokens[ts->cursor--];
-	ts->length--;
+token *token_stream_get(token_stream *ts) {
+	token *t = &ts->tokens[ts->cursor++];
 	return t;
 }
