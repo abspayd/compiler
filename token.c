@@ -1,4 +1,6 @@
 #include "token.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 char* tokenName(token *token) {
 	switch (token->type) {
@@ -32,4 +34,42 @@ char* tokenName(token *token) {
 		case TOKEN_KEYWORD_WHILE: return "TOKEN_KEYWORD_WHILE";
 		default: return "Undefinded";
 	}
+}
+
+token_stream token_stream_init(void) {
+	token_stream ts;
+	ts.tokens = (token*) malloc(sizeof(token) * INIT_STREAM_CAPACITY);
+	ts.length = 0;
+	ts.cursor = 0;
+	ts.capacity = INIT_STREAM_CAPACITY;
+	return ts;
+}
+
+void token_stream_close(token_stream *ts) {
+	for (size_t i = 0; i < ts->length; i++) {
+		free(ts->tokens[i].value);
+	}
+	free(ts->tokens);
+}
+
+void token_stream_resize(token_stream *ts, size_t size) {
+	token *tokens_new;
+	tokens_new = realloc(ts->tokens, size);
+	if (tokens_new != NULL) {
+		ts->capacity = size;
+	}
+}
+
+void token_stream_push(token_stream *ts, token *t) {
+	if (ts->length + 1 > ts->capacity) {
+		token_stream_resize(ts, ts->capacity * 2);
+	}
+	ts->tokens[++ts->cursor] = *t;
+	ts->length++;
+}
+
+token *token_stream_pop(token_stream *ts) {
+	token *t = &ts->tokens[ts->cursor--];
+	ts->length--;
+	return t;
 }

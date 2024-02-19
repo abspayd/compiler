@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "token.h"
 
-void lexer(FILE *fp);
+token_stream lexer(FILE *fp);
 char* lexer_analyze(FILE *fp, off_t start, size_t length);
 void lexer_consume(FILE *fp);
 token lexer_next(FILE *fp);

@@ -1,3 +1,5 @@
 *.o
 *.dSYM
 lexer
+parser
+compiler

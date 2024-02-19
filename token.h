@@ -1,6 +1,8 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
+#include <ctype.h>
+
 typedef enum {
 	TOKEN_END=0,
 	TOKEN_UNKNOWN,
@@ -43,7 +45,23 @@ typedef enum {
 typedef struct {
 	token_t type;
 	char* value;
+	int line;
 } token;
+
+typedef struct {
+	token* tokens;
+	size_t length;
+	size_t capacity;
+	size_t cursor;
+} token_stream;
+
+#define INIT_STREAM_CAPACITY 1024
+
+token_stream token_stream_init(void);
+void token_stream_push(token_stream *ts, token *t);
+token *token_stream_pop(token_stream *ts);
+void token_stream_resize(token_stream *ts, size_t size);
+void token_stream_close(token_stream *ts);
 
 char* tokenName(token *token);
 
