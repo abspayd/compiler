@@ -68,7 +68,7 @@ void token_stream_push(token_stream *ts, token *t) {
 	ts->length++;
 }
 
-token *token_stream_get(token_stream *ts) {
+token *token_stream_next(token_stream *ts) {
 	token *t = &ts->tokens[ts->cursor++];
 	return t;
 }

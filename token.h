@@ -59,7 +59,7 @@ typedef struct {
 
 token_stream token_stream_init(void);
 void token_stream_push(token_stream *ts, token *t);
-token *token_stream_get(token_stream *ts);
+token *token_stream_next(token_stream *ts);
 void token_stream_resize(token_stream *ts, size_t size);
 void token_stream_close(token_stream *ts);
 
