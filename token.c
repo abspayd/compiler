@@ -32,6 +32,12 @@ char* tokenName(token *token) {
 		case TOKEN_KEYWORD_IF: return "TOKEN_KEYWORD_IF";
 		case TOKEN_KEYWORD_ELSE: return "TOKEN_KEYWORD_ELSE";
 		case TOKEN_KEYWORD_WHILE: return "TOKEN_KEYWORD_WHILE";
+		case TOKEN_KEYWORD_TRUE: return "TOKEN_KEYWORD_TRUE";
+		case TOKEN_KEYWORD_FALSE: return "TOKEN_KEYWORD_FALSE";
+		case TOKEN_PLUS: return "TOKEN_PLUS";
+		case TOKEN_MINUS: return "TOKEN_MINUS";
+		case TOKEN_STAR: return "TOKEN_STAR";
+		case TOKEN_FORWARD_SLASH: return "TOKEN_FORWARD_SLASH";
 		default: return "Undefinded";
 	}
 }

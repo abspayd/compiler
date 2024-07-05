@@ -1,13 +1,12 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "token.h"
 #include "parser.h"
 
-
-
-void parser(token_stream *token_stream) {
-	token *t = token_stream_next(token_stream);
+void parser(token_stream *ts) {
+	token *t = token_stream_next(ts);
 	while (t->type != TOKEN_END) {
-		t = token_stream_next(token_stream);
+		t = token_stream_next(ts);
 	}
 	printf("End of token stream.\n");
 }

@@ -2,12 +2,14 @@
 #define LEXER_H_
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "token.h"
 
 token_stream lexer(FILE *fp);
 char* lexer_analyze(FILE *fp, off_t start, size_t length);
 void lexer_consume(FILE *fp);
 token lexer_next(FILE *fp);
+bool lexer_match(FILE *fp, char c);
 
 token lexer_end(FILE *fp);
 token lexer_next_literal(FILE *fp);

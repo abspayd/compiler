@@ -16,7 +16,7 @@ void printTokenStream(token_stream *ts) {
 int main(int argc, char** argv) {
 
 	if (argc < 2) {
-		printf("compiler <file.cmm>\n");
+		printf("compiler <file.pb>\n");
 		return 1;
 	}
 

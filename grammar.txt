@@ -1,0 +1,7 @@
+S		-> op ; | expr ;
+expr	-> ( op ) | ( number )
+op		-> number arith number | expr arith expr
+
+-- terminals
+number	-> int | float
+arith	-> + | - | * | /

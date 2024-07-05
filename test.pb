@@ -1,6 +1,7 @@
 int main() {
 	if (foo);
 	int x = 55;
+	int z = -5;
 	int y = 70;
 	int my_array[] = {1, 2, 3, 4};
 

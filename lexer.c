@@ -1,8 +1,11 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "token.h"
+#include <stdbool.h>
 #include "lexer.h"
+#include "token.h"
+
+int line = 1;
 
 const token SEPARATORS[] = {
 	{.type = TOKEN_OPEN_PAREN, .value = "("},
@@ -12,6 +15,10 @@ const token SEPARATORS[] = {
 	{.type = TOKEN_OPEN_BRACKET, .value = "["},
 	{.type = TOKEN_CLOSE_BRACKET, .value = "]"},
 	{.type = TOKEN_COMMA, .value = ","},
+	{.type = TOKEN_PLUS, .value = "+"},
+	{.type = TOKEN_MINUS, .value = "-"},
+	{.type = TOKEN_STAR, .value = "*"},
+	{.type = TOKEN_FORWARD_SLASH, .value = "/"},
 	{.type = TOKEN_SEMICOLON, .value = ";"},
 };
 const size_t SEPARATOR_COUNT = sizeof(SEPARATORS) / sizeof(token);
@@ -27,7 +34,33 @@ const token KEYWORDS[] = {
 };
 const size_t KEYWORD_COUNT = (int) sizeof(KEYWORDS) / sizeof(token);
 
-int line = 1;
+const token OPERATORS[] = {
+	{.type = TOKEN_EQUAL, .value = "="},
+	{.type = TOKEN_EQUAL_TO, .value = "=="},
+	{.type = TOKEN_NOT, .value = "!"},
+	{.type = TOKEN_NOT_EQUAL, .value = "!="},
+	{.type = TOKEN_LESS_THAN, .value = "<"},
+	{.type = TOKEN_LESS_THAN_EQUAL, .value = "<"},
+	{.type = TOKEN_GREATER_THAN, .value = ">"},
+	{.type = TOKEN_GREATER_THAN_EQUAL, .value = ">="},
+};
+const size_t OPERATOR_COUNT = (int) sizeof(OPERATORS) / sizeof(token);
+
+bool lexer_match(FILE *fp, char c) {
+	int next = fgetc(fp);
+	if (c == next) {
+		return true;
+	}
+
+	ungetc(c, fp);
+	return false;
+}
+
+char lexer_peek(FILE *fp) {
+	char c = fgetc(fp);
+	ungetc(c, fp);
+	return c;
+}
 
 void lexer_consume(FILE *fp) {
 	int c = fgetc(fp);
@@ -77,56 +110,71 @@ token lexer_end(FILE *fp) {
 }
 
 token lexer_spacer(FILE *fp) {
-	int c = fgetc(fp);
 	for (int i = 0; i < (int) SEPARATOR_COUNT; i++) {
-		if (c == *SEPARATORS[i].value) {
+		if (lexer_match(fp, *SEPARATORS[i].value)) {
 			return (token) { .type = SEPARATORS[i].type, .line = line };
 		}
 	}
-	ungetc(c, fp);
 	return (token) {.type = TOKEN_UNKNOWN, .line = line};
 }
 
 token lexer_operator(FILE *fp) {
 	int c = fgetc(fp);
-
-	if (c == '=') {
-		c = fgetc(fp);
-		if (c == '=') {
-			return (token) {.type = TOKEN_EQUAL_TO, .line = line};
-		} else {
-			ungetc(c, fp);
-			return (token) {.type = TOKEN_EQUAL, .line = line};
-		}
-	} else if (c == '!') {
-		c = fgetc(fp);
-		if (c == '=') {
-			return (token) {.type = TOKEN_NOT_EQUAL, .line = line};
-		} else {
-			ungetc(c, fp);
-			return (token) {.type = TOKEN_NOT, .line = line};
-		}
-	} else if (c == '<') {
-		c = fgetc(fp);
-		if (c == '=') {
-			return (token) {.type = TOKEN_LESS_THAN_EQUAL, .line = line};
-		} else {
-			ungetc(c, fp);
-			return (token) {.type = TOKEN_LESS_THAN, .line = line};
-		}
-	} else if (c == '>') {
-		c = fgetc(fp);
-		if (c == '=') {
-			return (token) {.type = TOKEN_GREATER_THAN_EQUAL, .line = line};
-		} else {
-			ungetc(c, fp);
-			return (token) {.type = TOKEN_GREATER_THAN, .line = line};
-		}
+	switch (c) {
+		case '!': 
+		break;
+		case '=': 
+			if (lexer_match(fp, '=')) {
+				return (token) {.type = TOKEN_EQUAL_TO, .line = line};
+			} else {
+				return (token) {.type = TOKEN_EQUAL, .line = line};
+			}
+		break;
 	}
 
 	ungetc(c, fp);
-	return (token) {.type = TOKEN_UNKNOWN, .line = line};
+	return (token) { .type = TOKEN_UNKNOWN, .line = line };
 }
+// token lexer_operator(FILE *fp) {
+// 	int c = fgetc(fp);
+// 
+// 	if (c == '=') {
+// 		c = fgetc(fp);
+// 		if (c == '=') {
+// 			return (token) {.type = TOKEN_EQUAL_TO, .line = line};
+// 		} else {
+// 			ungetc(c, fp);
+// 			return (token) {.type = TOKEN_EQUAL, .line = line};
+// 		}
+// 	} else if (c == '!') {
+// 		c = fgetc(fp);
+// 		if (c == '=') {
+// 			return (token) {.type = TOKEN_NOT_EQUAL, .line = line};
+// 		} else {
+// 			ungetc(c, fp);
+// 			return (token) {.type = TOKEN_NOT, .line = line};
+// 		}
+// 	} else if (c == '<') {
+// 		c = fgetc(fp);
+// 		if (c == '=') {
+// 			return (token) {.type = TOKEN_LESS_THAN_EQUAL, .line = line};
+// 		} else {
+// 			ungetc(c, fp);
+// 			return (token) {.type = TOKEN_LESS_THAN, .line = line};
+// 		}
+// 	} else if (c == '>') {
+// 		c = fgetc(fp);
+// 		if (c == '=') {
+// 			return (token) {.type = TOKEN_GREATER_THAN_EQUAL, .line = line};
+// 		} else {
+// 			ungetc(c, fp);
+// 			return (token) {.type = TOKEN_GREATER_THAN, .line = line};
+// 		}
+// 	}
+// 
+// 	ungetc(c, fp);
+// 	return (token) {.type = TOKEN_UNKNOWN, .line = line};
+// }
 
 token lexer_keyword(FILE *fp) {
 	off_t start = ftello(fp);
@@ -242,18 +290,3 @@ token_stream lexer(FILE *fp) {
 	ts.cursor = 0;
 	return ts;
 }
-
-// int main(int argc, char** argv) {
-// 	if (argc < 2) {
-// 		printf("lexer <file.cmm>\n");
-// 		return 1;
-// 	}
-// 
-// 	FILE *fp = fopen(argv[1], "r");
-// 
-// 	lexer(fp);
-// 
-// 	fclose(fp);
-// 
-// 	return 0;
-// }

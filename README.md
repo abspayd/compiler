@@ -1,2 +1,2 @@
 # compiler
-My process into learning how programming languages are made.
+A simple homemade programming language.
